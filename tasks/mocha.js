@@ -29,6 +29,9 @@ module.exports = function(grunt) {
   var fs = require('fs');
   var path = require('path');
 
+  // Mocha libs
+  var Mocha = require('mocha');
+
   // External libs.
   var Tempfile = require('temporary/lib/file');
   var growl;
@@ -136,10 +139,30 @@ module.exports = function(grunt) {
   };
 
   // ==========================================================================
-  // TASKS
+  // TEST RUNNERS
   // ==========================================================================
+  var unitjsRunner = function() {
+    var filepaths = grunt.file.expandFiles(this.file.src);
+    grunt.file.clearRequireCache(filepaths);
 
-  grunt.registerMultiTask('mocha', 'Run Mocha unit tests in a headless PhantomJS instance.', function() {
+    var paths = filepaths.map(path.resolve),
+        options = this.data.options || {},
+        mocha_instance = new Mocha(options);
+
+    paths.map(mocha_instance.addFile.bind(mocha_instance));
+
+    // we will now run mocha asynchronously and receive number of errors in a callback,
+    // which we'll use to report the result of the async task by calling done() with
+    // the appropriate value to indicate whether an error occurred
+    var done = this.async();
+    mocha_instance.run(function(errCount) {
+      // => done(false) if there were errors, done(true) if no errors
+      var withoutErrors = (0 === errCount);
+      done(withoutErrors);
+    });
+  };
+
+  var phantomjsRunner = function() {
     // Get files as URLs.
     var urls = file.expandFileURLs(this.file.src);
     
@@ -255,6 +278,31 @@ module.exports = function(grunt) {
       // All done!
       done();
     });
+  };
+
+  // ==========================================================================
+  // TASKS
+  // ==========================================================================
+
+  grunt.registerMultiTask('mocha', 'Run Mocha unit tests in a headless PhantomJS instance.', function() {
+    var isHTMLfile = function(it) {
+      return it.toString().indexOf(".html") > -1;
+    };
+    var hasHTMLfile = function(src) {
+      return file.expandFileURLs(src).some(isHTMLfile)
+    }
+
+    if (this.data && this.data.type === 'unit') {
+      // if the user has explicitly specified a unit test
+      unitjsRunner.apply(this, arguments);
+    } else if (this.file && hasHTMLfile(this.file.src)) {
+      // there are .html files present in the src passed, run with phantom
+      phantomjsRunner.apply(this, arguments);
+    } else {
+      // doesn't have any .html files, run as unit test
+      unitjsRunner.apply(this, arguments);
+    }
+
   });
 
   // ==========================================================================

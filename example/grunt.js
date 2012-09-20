@@ -47,6 +47,18 @@ module.exports = function(grunt) {
             // you want. You can split them up into different groups here
             // ex: admin: [ 'test/admin.html' ]
             all: [ 'test/**/*.html' ],
+            // if the src set given does not contain any .html files, the tests
+            // will be run using mocha unit runner instead
+            js: ['js/**/*.js', 'test/unit/**/*.js'],
+            unit: {
+                src: [ 'js/**/*.js', 'test/unit/**/*.js' ],
+                // or you can specifically define a multi-task to be run as unit test
+                type: 'unit',
+                // you can pass any of the usual options from grunt-simple-mocha
+                options: {
+                    reporter: 'nyan'
+                }
+            }
         }
     });
 

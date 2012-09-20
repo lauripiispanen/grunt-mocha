@@ -1,4 +1,4 @@
-var Wombat = function(opts) {
+Wombat = function(opts) {
     opts = opts || {};
     
     this.name = opts.name || 'Wally';

@@ -1,4 +1,4 @@
-var Apple = function(opts) {
+Apple = function(opts) {
     opts = opts || {};
     
     this.name = opts.name || 'Fuji';
