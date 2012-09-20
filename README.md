@@ -1,10 +1,13 @@
-Automatically run *client-side* mocha specs via grunt/mocha/PhantomJS
+Automatically run mocha specs either *client-side* via grunt/mocha/PhantomJS, or with a straight-up node.js mocha runner.
 
 # grunt-mocha
 
-(package/README format heavily borrowed from [grunt-jasmine-task](hhttps://github.com/creynders/grunt-jasmine-task) and builtin QUnit task)
+This plugin builds on the work from following projects:
 
-[Grunt](https://github.com/cowboy/grunt) plugin for running Mocha browser specs in a headless browser (PhantomJS)
+   * [Grunt](https://github.com/cowboy/grunt)
+   * [PhantomJS](http://phantomjs.org/)
+   * [grunt-simple-mocha](https://github.com/yaymukund/grunt-simple-mocha)
+   * (package/README format heavily borrowed from [grunt-jasmine-task](hhttps://github.com/creynders/grunt-jasmine-task) and builtin QUnit task)
 
 ## Getting Started
 
@@ -36,7 +39,22 @@ mocha: {
 },
 ```
 
-Replace ```specs/index.html``` with the location of your mocha spec running html file.
+The plugin will automatically detect if the list of files contains html files, and will run the tests with phantomJS if any are found. Replace ```specs/index.html``` with the location of your mocha spec running html file.
+
+Otherwise the task will run the tests in straight-up node.js mocha runner. Example configuration:
+
+```javascript
+js: ['js/**/*.js', 'test/unit/**/*.js'],
+unit: {
+    src: [ 'js/**/*.js', 'test/unit/**/*.js' ],
+    // or you can specifically define a multi-task to be run as unit test
+    type: 'unit',
+    // you can pass any of the usual options from grunt-simple-mocha
+    options: {
+        reporter: 'nyan'
+    }
+}
+```
 
 Now you can run the mocha task with `grunt mocha`, but it won't work. That's because you need...
 
